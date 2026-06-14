@@ -103,8 +103,13 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 text = "Construtores"
 
+[node name="Button3" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=897390880]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Noticias"
+
 [node name="Label2" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer" unique_id=1639785506]
-custom_minimum_size = Vector2(600, 300)
+custom_minimum_size = Vector2(600, 250)
 layout_mode = 2
 
 [connection signal="pressed" from="Panel/MarginContainer/VBoxContainer/Button" to="." method="_on_button_pressed"]
