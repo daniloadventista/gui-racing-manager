@@ -91,17 +91,17 @@ layout_mode = 2
 [node name="Button" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1543937542]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "Click Me"
+text = "Simular"
 
 [node name="Button2" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1309780039]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "Click Me"
+text = "Pilotos"
 
 [node name="ResetAllButton" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1649128003]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "Reset All"
+text = "Construtores"
 
 [node name="Label2" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer" unique_id=1639785506]
 custom_minimum_size = Vector2(600, 300)
