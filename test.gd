@@ -14,6 +14,7 @@ var corrida_atual = 1
 var total_corridas = 12
 
 var noticias = []
+var simulação_em_massa = false
 
 var recorde_vitorias = 0
 var recordista_vitorias = ""
@@ -178,13 +179,9 @@ func _on_button_pressed():
 	
 	var resultado_corrida = []
 	if corrida_atual > total_corridas:
-
 		finalizar_temporada()
-
-		resultado.text = "TEMPORADA ENCERRADA\n\nClique em Ver Classificação"
-
+		resultado.text = "TEMPORADA ENCERRADA (" + str(ano_atual - 1) + ")\n\nPróximo ano: " + str(ano_atual) + "\nClique em Avançar para iniciar a nova temporada."
 		return
-
 	for piloto in pilotos:
 
 		var status = "OK"
@@ -372,7 +369,9 @@ func _on_button_pressed():
 
 	corrida_atual += 1
 
-	print(texto)
+	if not simulação_em_massa:
+		resultado.text = texto
+		print(texto)
 
 func finalizar_temporada():
 
@@ -420,10 +419,26 @@ func finalizar_temporada():
 			campeao.nome +
 			" alcança histórico de 7 títulos."
 		)
+
+	# --- NOVO: Atualiza a idade dos pilotos que ainda estão no POOL ---
+	for piloto_pool in poolPilotos:
+		piloto_pool.idade += 1
 	var pilotos_remover = []
 
 	for piloto in pilotos:
+		## atualisa idade e qualidade dos pilots
 		piloto.idade += 1
+		if piloto.idade >= 34:
+
+			piloto.velocidade -= randi_range(0,1)
+
+		if piloto.idade >= 37:
+
+			piloto.velocidade -= randi_range(0,2)
+			piloto.consistencia -= randi_range(0,1)
+
+		piloto.velocidade = max(50,piloto.velocidade)
+		piloto.consistencia = max(50,piloto.consistencia)
 		
 		var chance_aposentadoria = 0
 
@@ -460,9 +475,14 @@ func finalizar_temporada():
 
 	for piloto in pilotos_remover:
 		pilotos.erase(piloto)
+		
+	# Executa a entrada de novos pilotos para preencher as vagas abertas
 	var vagas = pilotos_remover.size()
 	for i in range(vagas):
 		adicionar_novato()
+		
+	# Evolui os atributos dos jovens que ficaram
+	evoluir_pilotos()
 
 func adicionar_novato():
 	var candidatos = []
@@ -481,10 +501,25 @@ func adicionar_novato():
 			if piloto.equipe == equipe:
 				quantidade += 1
 		if quantidade < 2:
-			equipes_disponiveis.append(equipe)
+			equipes_disponiveis.append({
+				"nome": equipe,
+				"forca": construtores[equipe].pontos
+			})
+	equipes_disponiveis.sort_custom(func(a,b):
+		return a.forca > b.forca
+	)
+	## pilotos fortes do pool tentam entrar em equipes fortes
 	if equipes_disponiveis.size() == 0:
 		return
-	escolhido.equipe = equipes_disponiveis.pick_random()
+	if escolhido.potencial >= 95:
+		escolhido.equipe = equipes_disponiveis[0].nome
+	elif escolhido.potencial >= 85:
+		escolhido.equipe = equipes_disponiveis[
+			min(1,equipes_disponiveis.size()-1)
+		].nome
+	else:
+		escolhido.equipe = equipes_disponiveis.pick_random().nome
+		
 	pilotos.append(escolhido)
 	noticias.append(
 		escolhido.nome +
@@ -493,17 +528,87 @@ func adicionar_novato():
 		"."
 	)
 
+func evoluir_pilotos():
+	for piloto in pilotos:
+		if piloto.idade <= 30:
+			if piloto.velocidade < piloto.potencial:
+				piloto.velocidade += randi_range(0,2)
+			if piloto.consistencia < piloto.potencial:
+				piloto.consistencia += randi_range(0,1)
+			piloto.velocidade = min(
+				piloto.velocidade,
+				piloto.potencial
+			)
+			piloto.consistencia = min(
+				piloto.consistencia,
+				piloto.potencial
+			)
+
 func simular_10_temporadas():
-
+	simulação_em_massa = true # Ativa o modo silencioso para não travar o console
+	
 	for temporada in range(10):
-
-		for corrida in range(total_corridas):
-
+		# Garante que a temporada vai rodar todas as corridas do zero
+		corrida_atual = 1
+		
+		# Limpa as pontuações e abandonos dos construtores para o novo ano
+		for equipe in construtores.keys():
+			construtores[equipe]["pontos"] = 0
+			construtores[equipe]["abandonos"] = 0
+			construtores[equipe]["vitorias"] = 0
+			construtores[equipe]["podios"] = 0
+			construtores[equipe]["corridas"] = 0
+			
+		# Limpa os pontos acumulados da temporada anterior dos pilotos ativos
+		for piloto in pilotos:
+			piloto["pontos"] = 0
+			piloto["abandonos"] = 0
+			piloto["vitorias_seguidas"] = 0
+			
+		# Simula as 12 corridas da temporada atual
+		while corrida_atual <= total_corridas:
 			_on_button_pressed()
+			
+		# --- RELATÓRIO DETALHADO DA TEMPORADA ---
+		print("\n==================================================")
+		print("🏆 FIM DA TEMPORADA DE: ", ano_atual)
+		print("==================================================")
+		
+		# Executa a lógica de encerramento (aposentadorias, contratações, etc.)
+		if has_method("finalizar_temporada"):
+			finalizar_temporada()
+		
+		# Encontra e exibe o Campeão Mundial desta temporada específica
+		var campeao_temporada = null
+		var maior_pontuacao = -1
+		for piloto in pilotos:
+			if piloto["pontos"] > maior_pontuacao:
+				maior_pontuacao = piloto["pontos"]
+				campeao_temporada = piloto
+				
+		if campeao_temporada != null:
+			print("🥇 CAMPEÃO MUNDIAL: ", campeao_temporada["nome"], " com ", maior_pontuacao, " pontos!")
+			if campeao_temporada.has("equipe"):
+				print("🏎️  Equipe: ", campeao_temporada["equipe"])
+		
+		# Exibe o restante das notícias (Estreias, Aposentadorias, etc.)
+		print("\n📰 NOTÍCIAS DA TEMPORADA:")
+		if noticias.size() > 0:
+			for noticia in noticias:
+				# Evita duplicar o texto se você já tiver colocado o campeão nas notícias
+				if not "campeonato" in noticia and not "título mundial" in noticia:
+					print(" - ", noticia)
+			noticias.clear() # Limpa para a próxima temporada
+		else:
+			print(" - Nenhuma notícia relevante este ano.")
+			
+		print("==================================================\n")
+		
+		# REMOVIDO: ano_atual += 1 foi removido daqui, 
+		# pois o seu 'finalizar_temporada' já avança o ano corretamente de 1 em 1!
+		
+	simulação_em_massa = false # Desativa o modo silencioso após o término das 10 temporadas
 
-		finalizar_temporada()
-
-		print("Fim da temporada: ", ano_atual)
 func gerar_noticias():
 	noticias.clear()
 	for piloto in pilotos:
@@ -561,6 +666,7 @@ func mostrar_classificacao_pilotos():
 		texto += "\n"
 
 	resultado.text = texto
+
 func _on_button2_pressed():
 	var new_stylebox_normal = button2.get_theme_stylebox("normal").duplicate()
 	new_stylebox_normal.border_color = Color(0, 1, 0.5)
@@ -575,7 +681,6 @@ func _on_button2_pressed():
 
 	label.add_theme_color_override("font_color", Color(0.5, 1, 0.75))
 	mostrar_classificacao_pilotos()
-	#simular_10_temporadas()
 
 func mostrar_classificacao_construtores():
 
@@ -617,6 +722,7 @@ func mostrar_classificacao_construtores():
 		texto += "\n"
 
 	resultado.text = texto
+
 func _on_reset_all_button_pressed():
 	button.remove_theme_stylebox_override("normal")
 	button.remove_theme_stylebox_override("hover")
@@ -629,3 +735,14 @@ func _on_reset_all_button_pressed():
 	label.remove_theme_color_override("font_color")
 	
 	mostrar_classificacao_construtores()
+
+
+func _on_button_4_pressed() -> void:
+	simular_10_temporadas()
+
+	resultado.text = (
+		"ANO ATUAL: " +
+		str(ano_atual) +
+		"\n\nPilotos ativos: " +
+		str(pilotos.size())
+	)
