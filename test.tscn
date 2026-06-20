@@ -120,3 +120,31 @@ text = "Simular 10 Temporadas"
 [node name="Label2" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Principal" unique_id=1639785506]
 custom_minimum_size = Vector2(600, 280)
 layout_mode = 2
+
+[node name="Temporada Atual" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 1
+
+[node name="ClassificacaoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Temporada Atual"]
+custom_minimum_size = Vector2(600, 310)
+layout_mode = 2
+size_flags_vertical = 3
+editable = false
+
+[node name="Histórico da Carreira" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 2
+
+[node name="SeletorPiloto" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="HistoricoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira"]
+custom_minimum_size = Vector2(600, 260)
+layout_mode = 2
+size_flags_vertical = 3
+editable = false

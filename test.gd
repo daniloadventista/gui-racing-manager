@@ -11,6 +11,11 @@ extends Control
 @onready var button4 = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button4
 @onready var resultado = null
 
+@onready var tab_container = $Panel/MarginContainer/VBoxContainer/TabContainer
+@onready var classificacao_texto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Temporada Atual/ClassificacaoTexto"
+@onready var seletor_piloto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira/SeletorPiloto"
+@onready var historico_texto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira/HistoricoTexto"
+
 var corrida_atual = 1
 var total_corridas = 12
 
@@ -164,6 +169,14 @@ func _ready():
 	
 	button.grab_focus()
 	print("JOGO INICIOU COM SUCESSO")
+
+	# Conecta os sinais de mudança de aba e seleção do menu drop-down
+	tab_container.tab_changed.connect(_on_tab_changed)
+	seletor_piloto.item_selected.connect(_on_piloto_selecionado)
+	
+	# Preenche a lista de pilotos pela primeira vez
+	atualizar_menu_pilotos()
+
 	#var resultado = get_node("VBoxContainer/RichTextLabel")
 	#resultado.text = "Jogo iniciado"
 
@@ -757,3 +770,113 @@ func _on_button_4_pressed() -> void:
 		"\n\nPilotos ativos: " +
 		str(pilotos.size())
 	)
+
+func _on_tab_changed(tab_index: int):
+	if tab_index == 1:
+		gerar_estatisticas_temporada_atual()
+	elif tab_index == 2:
+		atualizar_menu_pilotos()
+		_on_piloto_selecionado(seletor_piloto.selected)
+
+func atualizar_menu_pilotos():
+	var item_selecionado_atual = seletor_piloto.selected
+	var nome_salvo = ""
+	if item_selecionado_atual != -1:
+		nome_salvo = seletor_piloto.get_item_metadata(item_selecionado_atual)
+	
+	seletor_piloto.clear()
+	
+	# Criamos uma lista combinada pura
+	var lista_base = pilotos + pilotos_aposentados
+	
+	# DUPLICAMOS a lista em um novo array para que a ordenação não mexa nos índices do jogo original
+	var lista_ordenada = lista_base.duplicate()
+	
+	# Ordenação tripla: 1º Títulos, 2º Vitórias, 3º Pódios
+	lista_ordenada.sort_custom(func(a, b):
+		if a.titulos != b.titulos:
+			return a.titulos > b.titulos
+		if a.vitorias != b.vitorias:
+			return a.vitorias > b.vitorias
+		return a.podios > b.podios
+	)
+	
+	for i in range(lista_ordenada.size()):
+		var p = lista_ordenada[i]
+		var sufixo = ""
+		if p in pilotos_aposentados:
+			sufixo = " (Aposentado)"
+		seletor_piloto.add_item(p.nome + sufixo, i)
+		# Guarda o nome real do piloto dentro do item para busca precisa
+		seletor_piloto.set_item_metadata(i, p.nome)
+		
+		if p.nome == nome_salvo:
+			seletor_piloto.select(i)
+			
+	if seletor_piloto.selected == -1 and seletor_piloto.item_count > 0:
+		seletor_piloto.select(0)
+
+func gerar_estatisticas_temporada_atual():
+	var texto = "ESTATÍSTICAS DA TEMPORADA ATUAL / ÚLTIMA TEMPORADA (" + str(ano_atual) + ")\n"
+	texto += "================================================================\n\n"
+	
+	var campeonato_temp = pilotos.duplicate()
+	campeonato_temp.sort_custom(func(a, b):
+		return a.pontos > b.pontos
+	)
+	
+	for i in range(campeonato_temp.size()):
+		var p = campeonato_temp[i]
+		texto += str(i+1) + "º " + p.nome + " - Equipe: " + p.equipe + "\n"
+		texto += "   Pontos no campeonato: " + str(p.pontos) + " pts\n"
+		texto += "   Vitórias este ano: " + str(p.vitorias) + "\n"
+		texto += "   Pódios este ano: " + str(p.podios) + "\n"
+		texto += "   Abandonos este ano: " + str(p.abandonos) + "\n"
+		texto += "----------------------------------------------------------------\n"
+	
+	classificacao_texto.text = texto
+
+func _on_piloto_selecionado(index: int):
+	if index == -1:
+		historico_texto.text = "Nenhum piloto selecionado."
+		return
+		
+	# Obtém o nome real do piloto associado a essa linha selecionada
+	var nome_buscado = seletor_piloto.get_item_metadata(index)
+	
+	var todos_os_pilotos = pilotos + pilotos_aposentados
+	var p = null
+	
+	# Busca o piloto correto pelo nome correspondente
+	for piloto in todos_os_pilotos:
+		if piloto.nome == nome_buscado:
+			p = piloto
+			break
+			
+	if p == null:
+		historico_texto.text = "Erro ao carregar dados do piloto."
+		return
+	
+	var texto = "HISTÓRICO COMPLETO DA CARREIRA - STATS ACUMULADAS\n"
+	texto += "Nome do Piloto: " + p.nome + "\n"
+	texto += "Idade Atual: " + str(p.idade) + " anos\n"
+	
+	if p in pilotos_aposentados:
+		texto += "Situação: APOSENTADO da categoria\n"
+	else:
+		texto += "Equipe Atual: " + p.equipe + "\n"
+		
+	texto += "----------------------------------------------------------------\n"
+	texto += "• Títulos Mundiais Conquistados: " + str(p.titulos) + " 🏆\n"
+	texto += "• Total de Grandes Prêmios disputados: " + str(p.corridas) + "\n"
+	texto += "• Vitórias totais na carreira: " + str(p.vitorias) + "\n"
+	texto += "• Pódios totais na carreira: " + str(p.podios) + "\n"
+	texto += "• Total de vezes que abandonou (Quebras/Acidentes): " + str(p.abandonos) + "\n"
+	texto += "----------------------------------------------------------------\n"
+	texto += "ATRIBUTOS DE PILOTAGEM:\n"
+	texto += " -> Velocidade base: " + str(p.velocidade) + "\n"
+	texto += " -> Consistência: " + str(p.consistencia) + "\n"
+	texto += " -> Agressividade: " + str(p.agressividade) + "\n"
+	texto += "================================================================\n"
+	
+	historico_texto.text = texto
