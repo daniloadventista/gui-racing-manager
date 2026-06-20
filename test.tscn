@@ -82,7 +82,7 @@ theme_override_constants/separation = 10
 
 [node name="Label" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1782147625]
 layout_mode = 2
-text = "GUI Theming Overrides"
+text = "Racing Simulator"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer" unique_id=1318329566]
