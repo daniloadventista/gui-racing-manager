@@ -156,11 +156,12 @@ func _on_button_pressed():
 
 	label.add_theme_color_override("font_color", Color(1, 1, 0.5))
 	
-	var resultado_corrida = []
 	if corrida_atual > total_corridas:
 		finalizar_temporada()
-		resultado.text = "TEMPORADA ENCERRADA (" + str(ano_atual - 1) + ")\n\nPróximo ano: " + str(ano_atual) + "\nClique em Avançar para iniciar a nova temporada."
+		resultado.text = "NOVA TEMPORADA INICIADA (" + str(ano_atual) + ")\n\nClique novamente em Simular para correr o GP 1."
 		return
+
+	var resultado_corrida = []
 	for piloto in pilotos:
 
 		var status = "OK"
@@ -243,32 +244,28 @@ func _on_button_pressed():
 
 	var texto = ""
 
-	texto += "CORRIDA "
-	texto += str(corrida_atual)
-	texto += "/"
-	texto += str(total_corridas)
+	# Cabeçalho indicando a corrida atual e o ano vigente do campeonato
+	texto += "CORRIDA " + str(corrida_atual) + "/" + str(total_corridas) + " (" + str(ano_atual) + ")"
 	texto += "\n\n"
 
 	texto += "RESULTADO\n\n"
 	
-	#resultado
+	# Listagem do resultado da corrida com formatação especial para o pódio
 	for i in range(resultado_corrida.size()):
-
 		var piloto = resultado_corrida[i].ref
 
 		if resultado_corrida[i].status != "OK":
-
-			texto += piloto.nome
-			texto += " - "
-			texto += resultado_corrida[i].status
-			texto += "\n"
-
+			texto += str(i+1) + "º - " + piloto.nome + " - " + resultado_corrida[i].status + "\n"
 		else:
-
-			texto += str(i+1)
-			texto += "º - "
-			texto += piloto.nome
-			texto += "\n"
+			var emoji_podio = ""
+			if i == 0:
+				emoji_podio = " 🏆" # Troféu dourado para o 1º
+			elif i == 1:
+				emoji_podio = " 🥈" # Troféu prateado para o 2º
+			elif i == 2:
+				emoji_podio = " 🥉" # Troféu de bronze para o 3º
+				
+			texto += str(i+1) + "º - " + piloto.nome + emoji_podio + "\n"
 
 	texto += "\nCAMPEONATO\n\n"
 
@@ -462,6 +459,31 @@ func finalizar_temporada():
 		
 	# Evolui os atributos dos jovens que ficaram
 	evoluir_pilotos()
+
+	# --- RESET PARA A NOVA TEMPORADA ---
+	corrida_atual = 1 # Reseta o contador para permitir novas simulações corrida a corrida
+	
+	# Limpa os pontos e abandonos dos construtores para o novo ano
+	for equipe in construtores.keys():
+		construtores[equipe]["pontos"] = 0
+		construtores[equipe]["abandonos"] = 0
+		construtores[equipe]["vitorias"] = 0
+		construtores[equipe]["podios"] = 0
+		construtores[equipe]["corridas"] = 0
+		
+	# Limpa os pontos e dados temporários dos pilotos que continuam ativos
+	for piloto in pilotos:
+		piloto["pontos"] = 0
+		piloto["abandonos"] = 0
+		piloto["vitorias_seguidas"] = 0
+		
+	# Limpa o console do Godot para a nova temporada não poluir o terminal
+	limpar_console_godot()
+
+# Função que limpa o console do editor do Godot 4
+func limpar_console_godot():
+	if OS.is_stdout_verbose() or true:
+		print("\u001b[2J\u001b[H") # Código ANSI para limpar tela e resetar cursor
 
 func adicionar_novato():
 	var candidatos = []
