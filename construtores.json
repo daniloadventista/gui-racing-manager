@@ -1,0 +1,19 @@
+{
+  "McLaren": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Ferrari": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Williams": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Benetton": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Tyrrell": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Lotus": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Leyton House": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Ligier": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Arrows": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Minardi": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Larrousse": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "AGS": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Osella": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "EuroBrun": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Coloni": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Life": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Onyx": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0}
+}
