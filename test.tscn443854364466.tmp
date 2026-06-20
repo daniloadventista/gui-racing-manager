@@ -121,3 +121,11 @@ text = "Simular 10 Temporadas"
 custom_minimum_size = Vector2(600, 310)
 layout_mode = 2
 
+[node name="VBoxContainer2" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=135353139]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[connection signal="pressed" from="Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button2" to="." method="_on_button2_pressed"]
+[connection signal="pressed" from="Panel/MarginContainer/VBoxContainer/TabContainer/Principal/ResetAllButton" to="." method="_on_reset_all_button_pressed"]
+[connection signal="pressed" from="Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button4" to="." method="_on_button_4_pressed"]

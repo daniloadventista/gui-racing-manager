@@ -5,9 +5,10 @@ extends Control
 # instead of `set("custom_styles/normal", ...)`.
 
 @onready var label = $Panel/MarginContainer/VBoxContainer/Label
-@onready var button = $Panel/MarginContainer/VBoxContainer/Button
-@onready var button2 = $Panel/MarginContainer/VBoxContainer/Button2
-@onready var reset_all_button = $Panel/MarginContainer/VBoxContainer/ResetAllButton
+@onready var button = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button
+@onready var button2 = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button2
+@onready var reset_all_button = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/ResetAllButton
+@onready var button4 = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Button4
 @onready var resultado = null
 
 var corrida_atual = 1
@@ -145,14 +146,24 @@ var ano_atual = 1990
 var pilotos_aposentados = []
 
 func _ready():
-	resultado = $Panel/MarginContainer/VBoxContainer/Label2
-	print(resultado)
+	resultado = $Panel/MarginContainer/VBoxContainer/TabContainer/Principal/Label2
 	resultado.visible = true
 	resultado.text = ("Jogo iniciado")
 	
-	# Focus the first button automatically for keyboard/controller-friendly navigation.
+	# Desconecta conexões residuais antigas para evitar o erro de duplicados
+	if button.pressed.is_connected(_on_button_pressed): button.pressed.disconnect(_on_button_pressed)
+	if button2.pressed.is_connected(_on_button2_pressed): button2.pressed.disconnect(_on_button2_pressed)
+	if reset_all_button.pressed.is_connected(_on_reset_all_button_pressed): reset_all_button.pressed.disconnect(_on_reset_all_button_pressed)
+	if button4.pressed.is_connected(_on_button_4_pressed): button4.pressed.disconnect(_on_button_4_pressed)
+	
+	# Força as conexões corretas via código
+	button.pressed.connect(_on_button_pressed)
+	button2.pressed.connect(_on_button2_pressed)
+	reset_all_button.pressed.connect(_on_reset_all_button_pressed)
+	button4.pressed.connect(_on_button_4_pressed)
+	
 	button.grab_focus()
-	print("JOGO INICIOU")
+	print("JOGO INICIOU COM SUCESSO")
 	#var resultado = get_node("VBoxContainer/RichTextLabel")
 	#resultado.text = "Jogo iniciado"
 
