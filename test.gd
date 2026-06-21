@@ -60,10 +60,12 @@ var fatores_simulacao : Dictionary = {}
 # Caminhos dos arquivos de configuração
 # TODO melhoria proposta adcionar pool de construtores e mecanica relacionada a construtores
 # TODO melhoria budget de construtores e impacto no desempenho, evolução dos carros, etc.
-const CAMINHO_CONSTRUTORES = "res://construtores.json"
-const CAMINHO_POOL_PILOTOS = "res://pool_pilotos.json"
+const CAMINHO_CONSTRUTORES = "res://construtores.txt"
+#const CAMINHO_POOL_PILOTOS = "res://pool_pilotos.json"
+const CAMINHO_POOL_PILOTOS = "res://pool_pilotos.txt"
 # TODO melhoria evolução dos pilotos, impacto da idade, evolução do potencial, etc.
-const CAMINHO_PILOTOS = "res://pilotos.json"
+const CAMINHO_PILOTOS = "res://pilotos.txt"
+#const CAMINHO_PILOTOS = "res://pilotos.json"
 #  TODO O arquivo de fatores de simulação pode conter dados como: 
 	#influência do clima, características das pistas, evolução dos pilotos, etc.
 	# outros fatores cambio, motor, velocidade, consistencia, agressividade
@@ -88,7 +90,7 @@ const CAMINHO_PILOTOS = "res://pilotos.json"
 	# outros fatores como: evolução dos sistemas de treinamento, preparação física, etc.
 	# outros fatores como: lesões, saúde dos pilotos, etc.
 	# outros fatores como: sorte, azar, etc.
-const CAMINHO_FATORES = "res://fatores_simulacao.json"
+const CAMINHO_FATORES = "res://fatores_simulacao.txt"
 
 var ano_atual = 1990
 var pilotos_aposentados = []
@@ -110,20 +112,80 @@ func carregar_dados_json(caminho_arquivo: String):
 		
 	return dados
 
+# Nova função genérica para carregar dados estruturados a partir de arquivos TXT/CSV
+func carregar_dados_txt(caminho_arquivo: String):
+	if not FileAccess.file_exists(caminho_arquivo):
+		push_error("Arquivo não encontrado: " + caminho_arquivo)
+		return null
+		
+	var arquivo = FileAccess.open(caminho_arquivo, FileAccess.READ)
+	var linhas: Array = []
+	
+	# Lê a primeira linha como o cabeçalho das propriedades (ex: nome,idade,velocidade)
+	var cabecalho_linha = arquivo.get_line().strip_edges()
+	var chaves = cabecalho_linha.split(",")
+	
+	# Percorre o resto do arquivo linha por linha
+	while not arquivo.eof_reached():
+		var linha = arquivo.get_line().strip_edges()
+		if linha == "":
+			continue # Ignora linhas vazias
+			
+		var valores = linha.split(",")
+		var item_dicionario = {}
+		
+		# Associa as colunas aos nomes das propriedades mapeadas no cabeçalho
+		for i in range(min(chaves.size(), valores.size())):
+			var chave = chaves[i].strip_edges()
+			var valor_texto = valores[i].strip_edges()
+			
+			# Converte automaticamente para número se aplicável, mantendo a tipagem correta
+			if valor_texto.is_valid_int():
+				item_dicionario[chave] = valor_texto.to_int()
+			elif valor_texto.is_valid_float():
+				item_dicionario[chave] = valor_texto.to_float()
+			else:
+				item_dicionario[chave] = valor_texto
+				
+		linhas.append(item_dicionario)
+		
+	arquivo.close()
+	return linhas
+
+# Função auxiliar para converter o Array de construtores do arquivo em formato de Dicionário indexado pelo nome
+func carregar_construtores_txt(caminho_arquivo: String) -> Dictionary:
+	var lista = carregar_dados_txt(caminho_arquivo)
+	var dicionario_resultado = {}
+	if lista:
+		for item in lista:
+			if item.has("nome"):
+				var nome_equipe = item["nome"]
+				dicionario_resultado[nome_equipe] = item
+	return dicionario_resultado
+
+# Função auxiliar para carregar fatores únicos de simulação em formato de Dicionário
+func carregar_fatores_txt(caminho_arquivo: String) -> Dictionary:
+	var lista = carregar_dados_txt(caminho_arquivo)
+	if lista and lista.size() > 0:
+		return lista[0] # Retorna a primeira linha mapeada
+	return {}
+
 # Função responsável por popular as variáveis do jogo no início
 func inicializar_dados_do_jogo():
 	# Configura conexões de botões e seletores do menu
 	configurar_conexoes_menu()
-	# Bloqueia as abas de jogo (Índices a partir de 2: Principal, Temporada Atual, Histórico, etc.)
-	# Isso impede que o jogador clique nelas antes de iniciar o jogo
+	
+	# Bloqueia as abas de jogo para impedir cliques antes da hora
 	for i in range(2, tab_container.get_tab_count()):
 		tab_container.set_tab_disabled(i, true)
-	# Garante que o jogo comece focado na primeira aba (Menu Principal)
 	tab_container.current_tab = 0
-	construtores = carregar_dados_json(CAMINHO_CONSTRUTORES)
-	poolPilotos = carregar_dados_json(CAMINHO_POOL_PILOTOS)
-	pilotos = carregar_dados_json(CAMINHO_PILOTOS)
-	fatores_simulacao = carregar_dados_json(CAMINHO_FATORES)
+	
+	# --- ALTERE AS LINHAS ABAIXO PARA USAR AS FUNÇÕES DE TXT ---
+	construtores = carregar_construtores_txt(CAMINHO_CONSTRUTORES)
+	pilotos = carregar_dados_txt(CAMINHO_PILOTOS)
+	poolPilotos = carregar_dados_txt(CAMINHO_POOL_PILOTOS)
+	fatores_simulacao = carregar_fatores_txt(CAMINHO_FATORES)
+	
 	print("Todos os dados externos foram carregados com sucesso!")
 
 func _ready():
@@ -605,20 +667,11 @@ func simular_10_temporadas():
 			piloto["abandonos"] = 0
 			piloto["vitorias_seguidas"] = 0
 			
-		# Simula as 12 corridas da temporada atual
+		# Simula as corridas da temporada atual
 		while corrida_atual <= total_corridas:
 			_on_button_pressed()
 			
-		# --- RELATÓRIO DETALHADO DA TEMPORADA ---
-		print("\n==================================================")
-		print("🏆 FIM DA TEMPORADA DE: ", ano_atual)
-		print("==================================================")
-		
-		# Executa a lógica de encerramento (aposentadorias, contratações, etc.)
-		if has_method("finalizar_temporada"):
-			finalizar_temporada()
-		
-		# Encontra e exibe o Campeão Mundial desta temporada específica
+		# --- CORREÇÃO DO BUG: Encontra o Campeão ANTES de resetar os dados na virada de ano ---
 		var campeao_temporada = null
 		var maior_pontuacao = -1
 		for piloto in pilotos:
@@ -626,10 +679,21 @@ func simular_10_temporadas():
 				maior_pontuacao = piloto["pontos"]
 				campeao_temporada = piloto
 				
+		# --- RELATÓRIO DETALHADO DA TEMPORADA ---
+		print("\n==================================================")
+		print("🏆 FIM DA TEMPORADA DE: ", ano_atual)
+		print("==================================================")
+		
 		if campeao_temporada != null:
-			print("🥇 CAMPEÃO MUNDIAL: ", campeao_temporada["nome"], " com ", maior_pontuacao, " pontos!")
-			if campeao_temporada.has("equipe"):
-				print("🏎️  Equipe: ", campeao_temporada["equipe"])
+			print("🥇 CAMPEÃO MUNDIAL: ", campeao_temporada["nome"])
+			print("⭐ Pontos no Ano: ", maior_pontuacao, " pts")
+			print("🏎️  Equipe: ", campeao_temporada.get("equipe", "Sem equipe"))
+			print("🏁 Vitórias Totais na Carreira: ", campeao_temporada.get("vitorias", 0))
+			print(" podiums Pódios Totais na Carreira: ", campeao_temporada.get("podios", 0))
+			
+		# Executa a lógica de encerramento (aposentadorias, contratações, avança o ano e ZERA os pontos)
+		if has_method("finalizar_temporada"):
+			finalizar_temporada()
 		
 		# Exibe o restante das notícias (Estreias, Aposentadorias, etc.)
 		print("\n📰 NOTÍCIAS DA TEMPORADA:")
@@ -643,9 +707,6 @@ func simular_10_temporadas():
 			print(" - Nenhuma notícia relevante este ano.")
 			
 		print("==================================================\n")
-		
-		# REMOVIDO: ano_atual += 1 foi removido daqui, 
-		# pois o seu 'finalizar_temporada' já avança o ano corretamente de 1 em 1!
 		
 	simulação_em_massa = false # Desativa o modo silencioso após o término das 10 temporadas
 

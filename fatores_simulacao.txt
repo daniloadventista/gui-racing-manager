@@ -1,0 +1,2 @@
+fator_quebra_motor,peso_agressividade
+1.2,1.5

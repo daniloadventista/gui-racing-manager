@@ -15,5 +15,7 @@
   "EuroBrun": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
   "Coloni": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
   "Life": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
-  "Onyx": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0}
+  "Onyx": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},
+  "Brabham": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0},  
+  "Lola": {"pontos": 0, "abandonos": 0, "vitorias": 0, "podios": 0, "corridas": 0}
 }

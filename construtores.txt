@@ -1,0 +1,19 @@
+nome,pontos,abandonos,vitorias,podios,corridas
+McLaren,0,0,0,0,0
+Ferrari,0,0,0,0,0
+Williams,0,0,0,0,0
+Benetton,0,0,0,0,0
+Tyrrell,0,0,0,0,0
+Lotus,0,0,0,0,0
+Leyton House,0,0,0,0,0
+Ligier,0,0,0,0,0
+Arrows,0,0,0,0,0
+Minardi,0,0,0,0,0
+Larrousse,0,0,0,0,0
+Brabham,0,0,0,0,0
+AGS,0,0,0,0,0
+Osella,0,0,0,0,0
+EuroBrun,0,0,0,0,0
+Coloni,0,0,0,0,0
+Life,0,0,0,0,0
+Lola,0,0,0,0,0
