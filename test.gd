@@ -13,6 +13,22 @@ extends Control
 
 @onready var tab_container = $Panel/MarginContainer/VBoxContainer/TabContainer
 @onready var classificacao_texto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Temporada Atual/ClassificacaoTexto"
+# --- NOVAS REFERÊNCIAS DE ABAS DENTRO DO TABCONTAINER ---
+@onready var main_menu_container = $"Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal"
+@onready var btn_start_game = $"Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal/BtnStartGame"
+@onready var btn_load_game = $"Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal/BtnLoadGame"
+@onready var btn_options = $"Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal/BtnOptions"
+
+@onready var modal_setup = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial"
+@onready var opt_ano = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial/OptAno"
+@onready var opt_equipe = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial/OptEquipe"
+@onready var opt_piloto_player = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial/OptPilotoPlayer"
+@onready var lbl_preview_pilotos = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial/LblPreviewPilotos"
+@onready var btn_confirmar_setup = $"Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial/BtnConfirmarSetup"
+
+# --- CONFIGURAÇÃO DE CONTROLE E ABAS ---
+var equipe_controlada: String = ""
+var piloto_controlado: String = ""
 @onready var seletor_piloto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira/SeletorPiloto"
 @onready var historico_texto = $"Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira/HistoricoTexto"
 
@@ -96,6 +112,14 @@ func carregar_dados_json(caminho_arquivo: String):
 
 # Função responsável por popular as variáveis do jogo no início
 func inicializar_dados_do_jogo():
+	# Configura conexões de botões e seletores do menu
+	configurar_conexoes_menu()
+	# Bloqueia as abas de jogo (Índices a partir de 2: Principal, Temporada Atual, Histórico, etc.)
+	# Isso impede que o jogador clique nelas antes de iniciar o jogo
+	for i in range(2, tab_container.get_tab_count()):
+		tab_container.set_tab_disabled(i, true)
+	# Garante que o jogo comece focado na primeira aba (Menu Principal)
+	tab_container.current_tab = 0
 	construtores = carregar_dados_json(CAMINHO_CONSTRUTORES)
 	poolPilotos = carregar_dados_json(CAMINHO_POOL_PILOTOS)
 	pilotos = carregar_dados_json(CAMINHO_PILOTOS)
@@ -132,6 +156,12 @@ func _ready():
 	# Preenche a lista de pilotos pela primeira vez
 	atualizar_menu_pilotos()
 
+	# Configura conexões com segurança contra erros de duplicidade
+	configurar_conexoes_menu()
+	
+	# Garante que o container de abas permaneça visível para o fluxo funcionar
+	tab_container.visible = true
+
 	#var resultado = get_node("VBoxContainer/RichTextLabel")
 	#resultado.text = "Jogo iniciado"
 
@@ -163,15 +193,24 @@ func _on_button_pressed():
 
 	var resultado_corrida = []
 	for piloto in pilotos:
+		# TODO melhorar mecanica piloto/equipe selecionada
+		# Aplicação do Buff de 2.5% em tempo real caso seja o piloto ou equipe selecionada
+		var multiplicador_velocidade: float = 1.0
+		var multiplicador_confiabilidade: float = 1.0
+		
+		if piloto.nome == piloto_controlado:
+			multiplicador_velocidade += 0.025
+		if piloto.equipe == equipe_controlada:
+			multiplicador_confiabilidade += 0.025
 
 		var status = "OK"
 
-		# Quebra de motor
-		if randi_range(1,1000) > piloto.motor * 10:
+		# Quebra de motor (Confiabilidade afetada positivamente pelo multiplicador da equipe)
+		if randi_range(1,1000) > (piloto.motor * 10) * multiplicador_confiabilidade:
 			status = "MOTOR"
 
 		# Quebra de câmbio
-		elif randi_range(1,1000) > piloto.cambio * 10:
+		elif randi_range(1,1000) > (piloto.cambio * 10) * multiplicador_confiabilidade:
 			status = "CAMBIO"
 
 		# Acidente
@@ -189,8 +228,8 @@ func _on_button_pressed():
 			construtores[piloto.equipe].abandonos += 1
 			continue
 
-		# Velocidade base
-		var desempenho = piloto.velocidade
+		# Velocidade base (Afetada positivamente pelo bônus de 2.5% se for o piloto controlado)
+		var desempenho = piloto.velocidade * multiplicador_velocidade
 
 		# Consistência
 		var variacao = randi_range(
@@ -857,3 +896,67 @@ func _on_piloto_selecionado(index: int):
 	texto += "================================================================\n"
 	
 	historico_texto.text = texto
+
+# --- SISTEMA DE FLUXO POR ABAS (MENU PRINCIPAL) ---
+
+func configurar_conexoes_menu():
+	# Verifica se o nó existe e se o sinal já não foi conectado previamente (via Editor) antes de conectar por código
+	if btn_start_game and not btn_start_game.pressed.is_connected(_on_start_game_pressed): 
+		btn_start_game.pressed.connect(_on_start_game_pressed)
+		
+	if opt_equipe and not opt_equipe.item_selected.is_connected(_on_equipe_menu_selected): 
+		opt_equipe.item_selected.connect(_on_equipe_menu_selected)
+		
+	if btn_confirmar_setup and not btn_confirmar_setup.pressed.is_connected(_on_confirmar_setup_pressed): 
+		btn_confirmar_setup.pressed.connect(_on_confirmar_setup_pressed)
+
+func _on_start_game_pressed():
+	# Configurar Ano Único no OptionButton
+	opt_ano.clear()
+	opt_ano.add_item("1990")
+	
+	# Configurar Lista de Equipes no OptionButton
+	opt_equipe.clear()
+	opt_equipe.add_item("Selecione uma Equipe...")
+	for eq in construtores.keys():
+		opt_equipe.add_item(eq)
+		
+	# Move o jogador para a segunda aba (Configuração Inicial)
+	tab_container.current_tab = 1
+
+func _on_equipe_menu_selected(index: int):
+	if index <= 0:
+		lbl_preview_pilotos.text = "Selecione uma equipe para ver os pilotos."
+		opt_piloto_player.clear()
+		return
+		
+	var eq_nome = opt_equipe.get_item_text(index)
+	var pilotos_da_equipe: Array = []
+	
+	opt_piloto_player.clear()
+	for p in pilotos:
+		if p.equipe == eq_nome:
+			pilotos_da_equipe.append(p.nome)
+			opt_piloto_player.add_item(p.nome)
+			
+	lbl_preview_pilotos.text = "Pilotos na " + eq_nome + ":\n• " + "\n• ".join(pilotos_da_equipe)
+
+func _on_confirmar_setup_pressed():
+	if opt_equipe.selected <= 0 or opt_piloto_player.item_count == 0:
+		return
+		
+	equipe_controlada = opt_equipe.get_item_text(opt_equipe.selected)
+	piloto_controlado = opt_piloto_player.get_item_text(opt_piloto_player.selected)
+	ano_atual = int(opt_ano.get_item_text(opt_ano.selected))
+	
+	# Desbloqueia as abas de jogo da simulação
+	for i in range(2, tab_container.get_tab_count()):
+		tab_container.set_tab_disabled(i, false)
+		
+	# Bloqueia as abas de menu para o jogador não voltar nelas no meio do campeonato
+	tab_container.set_tab_disabled(0, true)
+	tab_container.set_tab_disabled(1, true)
+	
+	# Move o jogador automaticamente para a aba "Principal" (Índice 2) para começar as corridas
+	tab_container.current_tab = 2
+	print("Jogo Inicializado! Buffs aplicados para " + piloto_controlado + " e equipe " + equipe_controlada)

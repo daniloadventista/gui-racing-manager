@@ -87,12 +87,58 @@ horizontal_alignment = 1
 [node name="TabContainer" type="TabContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=124963924]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 0
+current_tab = 1
+
+[node name="Menu Principal" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer" unique_id=18289423]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="BtnStartGame" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal" unique_id=1566692374]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Start Game"
+
+[node name="BtnLoadGame" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal" unique_id=1421462904]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Load Game"
+
+[node name="BtnOptions" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Menu Principal" unique_id=130874404]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Options"
+
+[node name="Configuração Inicial" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer" unique_id=1838496293]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="OptAno" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial" unique_id=657827628]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="OptEquipe" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial" unique_id=320649321]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="OptPilotoPlayer" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial" unique_id=1969079724]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="LblPreviewPilotos" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial" unique_id=789411315]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+
+[node name="BtnConfirmarSetup" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Configuração Inicial" unique_id=730492107]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Confirmar"
 
 [node name="Principal" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer" unique_id=5665996]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
-metadata/_tab_index = 0
+metadata/_tab_index = 2
 
 [node name="HSeparator" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Principal" unique_id=1318329566]
 layout_mode = 2
@@ -121,29 +167,29 @@ text = "Simular 10 Temporadas"
 custom_minimum_size = Vector2(600, 280)
 layout_mode = 2
 
-[node name="Temporada Atual" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+[node name="Temporada Atual" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer" unique_id=680693000]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
-metadata/_tab_index = 1
+metadata/_tab_index = 3
 
-[node name="ClassificacaoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Temporada Atual"]
+[node name="ClassificacaoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Temporada Atual" unique_id=1170954581]
 custom_minimum_size = Vector2(600, 310)
 layout_mode = 2
 size_flags_vertical = 3
 editable = false
 
-[node name="Histórico da Carreira" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+[node name="Histórico da Carreira" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer" unique_id=901365534]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
-metadata/_tab_index = 2
+metadata/_tab_index = 4
 
-[node name="SeletorPiloto" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira"]
+[node name="SeletorPiloto" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira" unique_id=1358652489]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
-[node name="HistoricoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira"]
+[node name="HistoricoTexto" type="TextEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Histórico da Carreira" unique_id=951452395]
 custom_minimum_size = Vector2(600, 260)
 layout_mode = 2
 size_flags_vertical = 3
